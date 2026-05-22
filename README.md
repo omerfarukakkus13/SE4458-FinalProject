@@ -1,67 +1,95 @@
 # KariyerAI - Job Portal Microservices (SE4458 Final Project)
 
-## Project Overview
-KariyerAI is a modern, distributed job portal application built using a microservices architecture. It allows job seekers to search, filter, and apply for jobs while allowing employers to post jobs and manage applicants. 
+## 🔗 Final Deployed URLs
+- **Frontend Application (Vercel):** [BURAYA VERCEL LINKINIZI YAZIN, örn: https://se4458-finalproject.vercel.app]
+- **API Gateway (Render):** https://api-gateway-6ji2.onrender.com
+- **Job Posting Service (Render):** https://job-posting-service-aynx.onrender.com
+- **Job Search Service (Render):** https://job-search-service-jljg.onrender.com
+- **Notification Service (Render):** https://notification-service-oznv.onrender.com
 
-The architecture strictly follows the **SE4458 Final Project** requirements, emphasizing cloud-native solutions, distributed caching, messaging queues, and NoSQL databases.
+## 🎥 Project Presentation Video
+- **Video Link:** [BURAYA YOUTUBE VEYA GOOGLE DRIVE VIDEO LINKINIZI YAZIN]
 
-## 🚀 Architecture & Technologies Used
+## 🏗️ Design, Assumptions, and Issues Encountered
 
-- **Frontend:** React (Vite) + Lucide Icons
-- **Backend (Microservices):** Node.js, Express.js
-- **Primary Database (Relational):** Supabase (PostgreSQL) - Used for User Auth, Job Postings, and Alerts.
-- **Secondary Database (NoSQL):** MongoDB Atlas - Used for storing User Search Histories.
-- **Distributed Cache:** Upstash Redis - Used to cache `/jobs` queries and reduce database load.
-- **Message Broker:** CloudAMQP (RabbitMQ) - Handles async job creation events.
-- **Authentication:** Supabase IAM (Cloud Auth)
-- **Deployment:** Docker & Docker Compose (Ready for AWS EC2)
+### Design & Architecture
+KariyerAI is a distributed job portal built using a microservices architecture.
+- **Frontend:** React (Vite) with a modern dark-mode UI.
+- **Backend Services:** Node.js & Express.
+- **Databases:** Supabase (PostgreSQL) for structured data (Jobs, Users, Alerts, Notifications). MongoDB Atlas (NoSQL) for unstructured data (Search Histories).
+- **Caching:** Upstash Redis is used in the `job-posting-service` to cache heavy queries.
+- **Message Broker:** RabbitMQ (CloudAMQP) is used to handle asynchronous notifications and background jobs.
+- **Deployment Strategy:** Each service is containerized (`Dockerfile`) and deployed independently on Render.com. The Frontend is deployed on Vercel. All frontend API calls go strictly through the centralized API Gateway.
 
----
+### Key Assumptions
+1. **AI Agent Implementation:** The project PDF required an "AI Agent chat window in the main application screen". To optimize performance (reduce server latency for LLM streaming) and eliminate unnecessary cloud costs, the AI Agent logic was implemented directly in the Frontend (`AIChat.jsx` via Google Gemini API). This is a serverless approach that fully satisfies the business use-case without requiring an extra intermediate Node.js microservice.
+2. **Notification Polling:** While the PDF mentioned background tasks, real-time in-app notifications were achieved via 15-second polling from the frontend to the backend rather than setting up a WebSocket connection, adhering to the "real-time messaging IS NOT required" note in the PDF.
+3. **Seed Data:** Mock jobs and randomized application counts were inserted into the database during initialization to demonstrate the UI effectively.
 
-## 🛠️ Microservices Setup
+### Issues Encountered & Resolutions
+1. **Render.com Node.js Versioning (WebSockets):** During cloud deployment on Render, the latest `@supabase/supabase-js` package crashed because Node 18 lacks native WebSocket support. We resolved this by explicitly upgrading all `Dockerfile` configurations to `FROM node:22-alpine`, which natively supports WebSockets.
+2. **API Gateway Empty Host Crash:** The API Gateway initially crashed because it attempted to proxy a missing AI Agent URL. This was resolved by removing the unused route and ensuring the Gateway only proxies the active microservices.
+3. **Cold Starts:** Since Render's Free Tier spins down inactive instances, initial API requests return 502 HTML errors. This is handled by waiting ~1 minute for the instances to wake up.
 
-The project is divided into the following isolated services:
+## 📊 Data Models (Entity-Relationship Diagram)
 
-1. **Job Posting Service (Port 3001):** Manages CRUD operations for jobs and job alerts. Handles job applications.
-2. **Job Search Service (Port 3002):** Proxies search requests and logs user searches to **MongoDB (NoSQL)**.
-3. **Notification Service (Port 3003):** 
-   - **Cron 1 (08:00):** Checks user's Job Alerts and sends matches.
-   - **Cron 2 (09:00):** Reads NoSQL Search History and sends related job recommendations.
-   - *Emails are sent using Nodemailer integration.*
-4. **API Gateway (Port 3000):** Basic routing gateway for potential monolithic external access.
-5. **Frontend (Port 80/5173):** React Single Page Application.
+```mermaid
+erDiagram
+    USERS ||--o{ JOBS : "creates (if employer)"
+    USERS ||--o{ APPLICATIONS : "applies to"
+    USERS ||--o{ JOB_ALERTS : "creates alert"
+    USERS ||--o{ SEARCH_HISTORY : "performs search (NoSQL)"
+    USERS ||--o{ NOTIFICATIONS : "receives"
+    
+    JOBS ||--o{ APPLICATIONS : "receives"
+    JOBS ||--o{ NOTIFICATIONS : "triggers"
 
----
+    USERS {
+        UUID id PK
+        string email
+        string role "EMPLOYER or SEEKER"
+    }
+    
+    JOBS {
+        bigint id PK
+        string title
+        string company_name
+        string city
+        string position
+        text description
+        text requirements
+        int applications_count
+        string status "ACTIVE/INACTIVE"
+    }
 
-## ☁️ Deployment Strategy
+    APPLICATIONS {
+        int id PK
+        bigint job_id FK
+        UUID user_id FK
+        timestamp applied_at
+    }
 
-Strictly following the project requirements, each service is deployed **independently** to cloud providers. The frontend only communicates with the backend through the **API Gateway**.
+    JOB_ALERTS {
+        int id PK
+        UUID user_id FK
+        string keywords
+        string city
+        string work_type
+    }
 
-### Deployment Steps:
-1. **Backend Microservices (Render.com / App Runner):**
-   Deploy `job-posting-service`, `job-search-service`, and `notification-service` as independent web services.
-2. **API Gateway:**
-   Deploy the `api-gateway` service. Configure its Environment Variables (`JOB_POSTING_URL`, `JOB_SEARCH_URL`) to point to the internal URLs of the deployed microservices.
-3. **Frontend (Vercel / Netlify):**
-   Deploy the React application. Set the `VITE_API_GATEWAY_URL` environment variable to the public URL of the deployed API Gateway.
+    SEARCH_HISTORY {
+        ObjectId id PK
+        UUID user_id
+        string keywords
+        string city
+        timestamp created_at
+    }
 
-This ensures a true microservices deployment where services are isolated and routed exclusively through the Gateway.
-
----
-
-## 📋 Fulfilled PDF Requirements Checklist
-- [x] **Microservices Architecture:** Implemented 4 backend services + API Gateway.
-- [x] **Cloud Auth (IAM):** Used Supabase Auth instead of local login.
-- [x] **Cloud DB (Relational):** Used Supabase PostgreSQL.
-- [x] **Cloud DB (NoSQL):** Used MongoDB Atlas for search history.
-- [x] **Distributed Caching:** Upstash Redis is active for Job Postings.
-- [x] **Message Queue:** RabbitMQ is used for background tasks.
-- [x] **Job Alerts (Cron):** Daily scheduled notifications via Node-Cron + Nodemailer.
-- [x] **Role-Based Views:** Employers can't apply, Job Seekers can't see the employer admin panel.
-- [x] **Dockerization:** Each service has a `Dockerfile` and orchestrated via `docker-compose.yml`.
-- [x] **UI/UX Design:** Dark mode, responsive, glassmorphism UI.
-
-## 🔗 Links (To be filled for submission)
-- **GitHub Repository:** [Insert Link Here]
-- **Live Application URL:** [Insert AWS EC2 IP Here]
-- **Video Walkthrough:** [Insert YouTube Link Here]
+    NOTIFICATIONS {
+        UUID id PK
+        UUID user_id FK
+        bigint job_id FK
+        string message
+        boolean is_read
+    }
+```
