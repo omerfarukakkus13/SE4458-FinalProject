@@ -1,0 +1,6 @@
+Start-Process -FilePath "node" -ArgumentList "src\index.js" -WorkingDirectory ".\api-gateway"
+Start-Process -FilePath "node" -ArgumentList "src\index.js" -WorkingDirectory ".\job-posting-service"
+Start-Process -FilePath "node" -ArgumentList "src\index.js" -WorkingDirectory ".\job-search-service"
+Start-Process -FilePath "node" -ArgumentList "src\index.js" -WorkingDirectory ".\notification-service"
+Start-Process -FilePath "node" -ArgumentList "src\index.js" -WorkingDirectory ".\ai-agent-service"
+Write-Host "All backend services have been started in separate windows."

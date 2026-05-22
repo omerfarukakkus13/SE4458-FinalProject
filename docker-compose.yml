@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    depends_on:
+      - job-posting-service
+      - job-search-service
+      - notification-service
+
+  job-posting-service:
+    build: ./job-posting-service
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./job-posting-service/.env
+
+  job-search-service:
+    build: ./job-search-service
+    ports:
+      - "3002:3002"
+    env_file:
+      - ./job-search-service/.env
+
+  notification-service:
+    build: ./notification-service
+    ports:
+      - "3003:3003"
+    env_file:
+      - ./notification-service/.env
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway

@@ -1,0 +1,9 @@
+publishable key:  sb_publishable_wan4026_7NOHvwPWrddg4g_9tqwtSkU 
+https://ypttdupwihxshsjskhee.supabase.co                       
+postgresql://postgres:[13Babayaga13.]@db.ypttdupwihxshsjskhee.supabase.co:5432/postgres        
+mango db username:omerfarukakkus13 
+password:13Babayaga13.
+mongodb+srv://omerfarukakkus13:13Babayaga13.@cluster0.cgb04p1.mongodb.net/?appName=Cluster0
+uptash :UPSTASH_REDIS_REST_URL="https://smart-man-129019.upstash.io"
+UPSTASH_REDIS_REST_TOKEN="gQAAAAAAAff7AAIgcDExODNjYWUwN2E3NDM0ZTIwYjZhMWE3MGVmNTllZTg3OQ"
+rabbitmq:amqps://telkmejz:xLibn_uVW2XIyaSFFytkw8JkwMBB51kO@cow.rmq2.cloudamqp.com/telkmejz
