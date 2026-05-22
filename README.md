@@ -1,7 +1,7 @@
 # KariyerAI - Job Portal Microservices (SE4458 Final Project)
 
 ## 🔗 Final Deployed URLs
-- **Frontend Application (Vercel):** [BURAYA VERCEL LINKINIZI YAZIN, örn: https://se4458-finalproject.vercel.app]
+- **Frontend Application (Vercel):** https://se-4458-final-project.vercel.app/job/3
 - **API Gateway (Render):** https://api-gateway-6ji2.onrender.com
 - **Job Posting Service (Render):** https://job-posting-service-aynx.onrender.com
 - **Job Search Service (Render):** https://job-search-service-jljg.onrender.com
