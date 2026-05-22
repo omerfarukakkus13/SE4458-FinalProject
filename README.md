@@ -8,7 +8,7 @@
 - **Notification Service (Render):** https://notification-service-oznv.onrender.com
 
 ## 🎥 Project Presentation Video
-- **Video Link:** [BURAYA YOUTUBE VEYA GOOGLE DRIVE VIDEO LINKINIZI YAZIN]
+- **Video Link:** https://drive.google.com/file/d/1_gltz7qccdhiCD0PeJL8LUiVHerOScH8/view?usp=drivesdk
 
 ---
 
